@@ -1,0 +1,34 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  height: 100%;
+  font-family: sans-serif;
+}
+
+/* Splash background */
+.splash {
+  height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  background-image: url("background\ image.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Centered logo */
+.logo {
+  width: 5rem;
+  height:5rem;
+}
+.logo1{
+  width: 24rem;
+  height:3rem;
+}

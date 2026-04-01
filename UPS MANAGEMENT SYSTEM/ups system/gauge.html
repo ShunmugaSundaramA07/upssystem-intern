@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gauge Example</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .gauge-container {
+      position: relative;
+      width: 300px;
+      height: 150px;
+      margin: 2rem auto;
+    }
+
+    .gauge-arc {
+      width: 100%;
+      height: 100%;
+      border-radius: 150px 150px 0 0;
+      background: conic-gradient(
+        green 0deg 45deg,
+        dodgerblue 45deg 90deg,
+        gold 90deg 135deg,
+        tomato 135deg 180deg,
+        #fff 180deg 360deg
+      );
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gauge-needle {
+      width: 6px;
+      height: 100px;
+      background: black;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform-origin: bottom center;
+      transform: rotate(-80deg); /* Change this value to rotate */
+      transition: transform 0.5s ease;
+      z-index: 2;
+    }
+
+    .gauge-center {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      border: 2px solid #000;
+    }
+
+    .gauge-labels {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .gauge-labels span {
+      position: absolute;
+      transform: translate(-50%, -50%);
+    }
+
+    .label-0 { left: 15%; top: 80%; }
+    .label-25 { left: 35%; top: 40%; }
+    .label-50 { left: 50%; top: 15%; }
+    .label-75 { left: 65%; top: 40%; }
+    .label-100 { left: 85%; top: 80%; }
+  </style>
+</head>
+<body>
+
+<div class="gauge-container">
+  <div class="gauge-arc">
+    <div class="gauge-needle" id="needle"></div>
+    <div class="gauge-center"></div>
+    <div class="gauge-labels">
+      <span class="label-0">0-25%</span>
+      <span class="label-25">26-50%</span>
+      <span class="label-50">51-75%</span>
+      <span class="label-75">76-99%</span>
+      <span class="label-100">100%</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Rotate the needle to a value between 0–100
+  function setGaugeValue(value) {
+    const needle = document.getElementById('needle');
+    const degree = (value / 100) * 180 - 90; // Converts value to -90 to +90 deg
+    needle.style.transform = `rotate(${degree}deg)`;
+  }
+
+  // Example: set gauge to 15%
+  setGaugeValue(15);
+</script>
+
+</body>
+</html>

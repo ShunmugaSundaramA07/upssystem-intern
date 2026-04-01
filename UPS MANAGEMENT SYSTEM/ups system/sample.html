@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CALCULATOR</title>
+    <link rel="icon" href="Calci.png" type="image/x-icon">
+    <style>
+    body {
+      background-color: #e8f0fe;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .calculator-box {
+      background: #fff;
+      border: 2px solid #007bff;
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 320px;
+      text-align: center;
+    }
+
+    .calculator-box h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #007bff;
+    }
+
+    input[type="text"] {
+      width: 120px;
+      padding: 10px;
+      margin: 10px 5px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 8px 5px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+<input type="text" id="num1" />
+<input type="text" id="num2" />
+<button onclick="calculate('+')">Add</button>
+<button onclick="calculate('-')">Subtract</button>
+<button onclick="calculate('/')">Divide</button>
+<button onclick="calculate('*')">Multiply</button>
+
+<p id="result">Answer:</p>
+<script>
+  function calculate(operator) {
+    const num1 = parseFloat(document.getElementById("num1").value);
+    const num2 = parseFloat(document.getElementById("num2").value);
+    let result;
+
+    switch (operator) {
+      case '+':
+        result = num1 + num2;
+        break;
+      case '-':
+        result = num1 - num2;
+        break;
+      case '*':
+        result = num1 * num2;
+        break;
+      case '/':
+        result = num2 !== 0 ? num1 / num2 : "Cannot divide by zero";
+        break;
+    }
+
+    document.getElementById("result").innerHTML = "Answer: " + result;
+  }
+</script>
+</body>
+</html>

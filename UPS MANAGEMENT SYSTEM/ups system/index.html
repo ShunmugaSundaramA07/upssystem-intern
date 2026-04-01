@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPS & Battery Management SPA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="Logo Icon.png" />
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --gray: #6b7280;
+      --bg: #f8fafc;
+      --card: #fff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 1.2rem;
+    }
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background: var(--bg); color: var(--text); margin: 0; }
+    .spa-root { min-height: 100vh; }
+    /* Sign In */
+    .signin-section {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+    }
+    .signin-card {
+      background: var(--card); padding: 2.5rem 2rem; border-radius: var(--radius); box-shadow: var(--shadow);
+      width: 100%; max-width: 350px; display: flex; flex-direction: column; align-items: center;
+    }
+    .signin-card img { width: 48px; margin-bottom: 1rem; }
+    .signin-card h2 { margin-bottom: 1.5rem; font-weight: 600; }
+    .signin-card input {
+      width: 100%; padding: 0.75rem 1rem; margin-bottom: 1rem; border: 1px solid var(--border);
+      border-radius: 0.5rem; font-size: 1rem;
+    }
+    .signin-card button {
+      width: 100%; padding: 0.75rem; background: var(--primary); color: #fff; border: none;
+      border-radius: 0.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;
+    }
+    .signin-card button:hover { background: #1d4ed8; }
+    .signin-error { color: var(--danger); margin-bottom: 1rem; font-size: 0.95rem; }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+    aside {
+      width: 250px; background: var(--card); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; justify-content: space-between; position: fixed; height: 100vh; z-index: 10;
+    }
+    .sidebar-top { padding: 2rem 1.5rem 1rem 1.5rem; }
+    .sidebar-logo { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 2.5rem; }
+    .sidebar-logo img { width: 32px; }
+    .sidebar-logo span { font-weight: 700; font-size: 1.2rem; }
+    .nav-menu { display: flex; flex-direction: column; gap: 0.5rem; }
+    .nav-link {
+      display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem; border-radius: 0.6rem;
+      color: var(--text-light); text-decoration: none; font-weight: 500; font-size: 1.05rem; transition: background 0.2s, color 0.2s;
+    }
+    .nav-link.active, .nav-link:hover { background: var(--bg); color: var(--primary); }
+    .nav-link img { width: 22px; }
+    .sidebar-bottom { padding: 1.5rem; }
+    .logout-btn {
+      display: flex; align-items: center; gap: 0.7rem; color: var(--danger); font-weight: 600; background: none;
+      border: none; font-size: 1.05rem; cursor: pointer; padding: 0.7rem 1rem; border-radius: 0.6rem; transition: background 0.2s;
+    }
+    .logout-btn:hover { background: #fee2e2; }
+    .logout-btn img { width: 20px; }
+
+    /* Main Content */
+    .main-content { flex: 1; margin-left: 250px; padding: 2.5rem 2rem 2rem 2rem; }
+    .banner-img { width: 100%; border-radius: 1.2rem; margin-bottom: 1.5rem; max-height: 160px; object-fit: cover; }
+    .summary-row { display: flex; gap: 1.5rem; margin-bottom: 2.2rem; }
+    .summary-card {
+      flex: 1; background: var(--card); border-radius: 1rem; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; padding: 1.2rem 0.5rem;
+      font-size: 1.1rem; font-weight: 500; position: relative;
+    }
+    .summary-card .summary-num { font-size: 2.1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .summary-card.active { color: var(--success); }
+    .summary-card.alarm { color: var(--warning); }
+    .summary-card.critical { color: var(--danger); }
+    .summary-card.ideal { color: var(--gray); }
+    .summary-card .summary-icon { font-size: 2rem; margin-top: 0.2rem; }
+
+    /* UPS Cards Grid */
+    .ups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+    .ups-card {
+      background: var(--card); border-radius: 1.2rem; box-shadow: var(--shadow); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; gap: 1.1rem;
+    }
+    .ups-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+    .ups-title { font-weight: 600; font-size: 1.08rem; }
+    .ups-status {
+      padding: 0.2rem 0.9rem; border-radius: 999px; font-size: 0.95rem; font-weight: 600;
+      color: #fff; display: flex; align-items: center; gap: 0.4rem;
+    }
+    .ups-status.red { background: var(--danger); }
+    .ups-status.yellow { background: var(--warning); color: #fff; }
+    .ups-status.green { background: var(--success); }
+    .ups-status.gray { background: var(--gray); }
+    .ups-updated { font-size: 0.92rem; color: var(--text-light); margin-top: 0.1rem; }
+    .ups-row { display: flex; align-items: center; gap: 1.2rem; }
+    .ups-battery {
+      background: #fee2e2; color: var(--danger); font-weight: 700; font-size: 1.3rem; border-radius: 0.7rem; padding: 0.5rem 1.1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .ups-battery.green { background: #dcfce7; color: var(--success); }
+    .ups-battery.yellow { background: #fef3c7; color: var(--warning); }
+    .ups-battery.gray { background: #e5e7eb; color: var(--gray); }
+    .ups-battery-icon { width: 22px; }
+    .ups-ac { display: flex; align-items: center; gap: 0.4rem; font-size: 1.05rem; color: var(--text-light); }
+    .ups-ac img { width: 22px; }
+    .ups-gauge-row { display: flex; align-items: center; gap: 1.2rem; margin: 0.7rem 0; }
+    .ups-gauge {
+      width: 90px; height: 50px; background: url('gauge.svg') no-repeat center/contain; position: relative;
+    }
+    .ups-gauge-needle {
+      position: absolute; left: 50%; bottom: 10px; width: 2px; height: 38px; background: #222; transform-origin: bottom center;
+      border-radius: 2px;
+    }
+    .ups-gauge-label { font-size: 1.05rem; font-weight: 500; }
+    .ups-info-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.2rem; }
+    .ups-info-list li { font-size: 0.98rem; color: var(--text-light); display: flex; align-items: center; gap: 0.5rem; }
+    .ups-info-list strong { color: var(--text); font-weight: 600; margin-left: 0.2rem; }
+
+    /* Placeholder Pages */
+    .placeholder-section { padding: 3rem 1rem; text-align: center; color: var(--text-light); font-size: 1.3rem; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      aside { width: 70px; }
+      .main-content { margin-left: 70px; }
+      .sidebar-logo span, .nav-link span, .logout-btn span { display: none; }
+      .nav-link, .logout-btn { justify-content: center; }
+      .sidebar-top, .sidebar-bottom { padding-left: 0.5rem; padding-right: 0.5rem; }
+    }
+    @media (max-width: 600px) {
+      .main-content { padding: 1rem 0.3rem; }
+      .summary-row { flex-direction: column; gap: 1rem; }
+      .ups-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="spa-root">
+    <!-- Loading Page -->
+    <section id="loading-section" style="display:none;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+      <div style="display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;">
+        <div style="background:rgba(34,197,94,0.12);border-radius:50%;padding:2.5rem;display:flex;align-items:center;justify-content:center;">
+          <img src="Battery Icon.svg" alt="Loading" style="width:90px;height:90px;" />
+        </div>
+      </div>
+    </section>
+    <!-- Sign In Section -->
+    <section id="signin-section" class="signin-section" style="min-height:100vh;display:flex;">
+      <div style="flex:1;background:url('UPS Management System Icons & Images/UPS Management System Icons & Images/Login & Sign Up Flow BG.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;">
+        <!-- left graphic, can add more if needed -->
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+        <form class="signin-card" id="signin-form" autocomplete="off" style="width:100%;max-width:370px;background:var(--card);box-shadow:var(--shadow);border-radius:1.2rem;padding:2.5rem 2rem;">
+          <img src="Logo Icon.png" alt="Logo" style="width:54px;margin-bottom:1.2rem;" />
+          <div style="font-weight:700;font-size:1.3rem;margin-bottom:0.7rem;">UPSANDBATTERY</div>
+          <div style="margin-bottom:2.2rem;font-size:1.1rem;color:var(--text-light);">welcome Back!</div>
+          <h2 style="margin-bottom:1.5rem;font-size:2rem;font-weight:700;">Sign In</h2>
+          <div class="signin-error" id="signin-error" style="display:none;"></div>
+          <input type="text" id="signin-username" placeholder="Username*" required style="margin-bottom:1.2rem;" />
+          <input type="password" id="signin-password" placeholder="Password*" required style="margin-bottom:0.7rem;" />
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+            <span></span>
+            <a href="#" style="color:var(--text-light);font-size:0.98rem;text-decoration:none;">Forgot Password?</a>
+          </div>
+          <button type="submit" style="width:100%;padding:0.9rem 0;background:#111;color:#fff;border:none;border-radius:0.5rem;font-weight:700;font-size:1.1rem;">Sign In</button>
+          <div style="margin-top:1.5rem;text-align:center;font-size:1rem;color:var(--text-light);">Don't have an account? <a href="#" style="color:#111;font-weight:600;text-decoration:underline;">Sign Up</a></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Main App Layout -->
+    <div id="app-layout" class="layout" style="display:none;">
+      <!-- Sidebar -->
+      <aside>
+        <div class="sidebar-top">
+          <div class="sidebar-logo">
+            <img src="Logo Icon.png" alt="Logo" />
+            <span>UPSANDBATTERY</span>
+          </div>
+          <nav class="nav-menu">
+            <a href="#" class="nav-link active" data-page="dashboard"><img src="Homee.png" alt="Dashboard" /><span>Dashboard</span></a>
+            <a href="#" class="nav-link" data-page="discover"><img src="UPS Icon.svg" alt="Discover UPS" /><span>Discover UPS</span></a>
+            <a href="#" class="nav-link" data-page="events"><img src="Events Icon.svg" alt="Events" /><span>Events</span></a>
+            <a href="#" class="nav-link" data-page="profile"><img src="Profile Icon.svg" alt="Profile" /><span>Profile</span></a>
+          </nav>
+        </div>
+        <div class="sidebar-bottom">
+          <button class="logout-btn" id="logout-btn"><img src="logout icon.png" alt="Logout" /><span>Logout</span></button>
+        </div>
+      </aside>
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section">
+          <img src="Dashboard Bananer Image.svg" alt="Banner" class="banner-img" />
+          <div class="summary-row">
+            <div class="summary-card active"><div class="summary-num">3</div>Active<div class="summary-icon">✔️</div></div>
+            <div class="summary-card alarm"><div class="summary-num">1</div>Alarm<div class="summary-icon">⚠️</div></div>
+            <div class="summary-card critical"><div class="summary-num">1</div>Critical<div class="summary-icon">🚫</div></div>
+            <div class="summary-card ideal"><div class="summary-num">0</div>Ideal<div class="summary-icon">❔</div></div>
+          </div>
+          <div class="ups-grid">
+            <!-- UPS Card 1 -->
+            <div class="ups-card">
+              <div class="ups-header-row">
+                <span class="ups-title">APC --- Back-UPS AB 750IG</span>
+                <span class="ups-status red">Critical</span>
+              </div>
+              <div class="ups-updated">Updated 20 mins ago</div>
+              <div class="ups-row">
+                <span class="ups-battery"><img src="Battery Icon.svg" class="ups-battery-icon" alt="Battery" />10%</span>
+                <span class="ups-ac"><img src="AC Power Source.svg" alt="AC" />AC Power Source</span>
+              </div>
+              <div class="ups-gauge-row">
+                <div class="ups-gauge" style="position:relative;">
+                  <div class="ups-gauge-needle" style="background:#ef4444;transform:translateX(-50%) rotate(-60deg);"></div>
+                </div>
+                <span class="ups-gauge-label">12% Load</span>
+              </div>
+              <ul class="ups-info-list">
+                <li>Estimated Time: <strong>2h30m</strong></li>
+                <li>Input Voltage: <strong>230V, 240V</strong></li>
+                <li>Output Voltage: <strong>248V, 256V</strong></li>
+                <li>Output Current: <strong>14.9A, 15A</strong></li>
+                <li>Temperature: <strong>16°C</strong></li>
+              </ul>
+            </div>
+            <!-- UPS Card 2 -->
+            <div class="ups-card">
+              <div class="ups-header-row">
+                <span class="ups-title">APC --- Back-UPS AB 750IG</span>
+                <span class="ups-status yellow">Alarm</span>
+              </div>
+              <div class="ups-updated">Updated 10 mins ago</div>
+              <div class="ups-row">
+                <span class="ups-battery yellow"><img src="Battery Icon.svg" class="ups-battery-icon" alt="Battery" />96%</span>
+                <span class="ups-ac"><img src="AC Power Source.svg" alt="AC" />AC Power Source</span>
+              </div>
+              <div class="ups-gauge-row">
+                <div class="ups-gauge" style="position:relative;">
+                  <div class="ups-gauge-needle" style="background:#f59e0b;transform:translateX(-50%) rotate(0deg);"></div>
+                </div>
+                <span class="ups-gauge-label">12% Load</span>
+              </div>
+              <ul class="ups-info-list">
+                <li>Estimated Time: <strong>2h30m</strong></li>
+                <li>Input Voltage: <strong>230V, 240V</strong></li>
+                <li>Output Voltage: <strong>248V, 256V</strong></li>
+                <li>Output Current: <strong>14.9A, 15A</strong></li>
+                <li>Temperature: <strong>16°C</strong></li>
+              </ul>
+            </div>
+            <!-- UPS Card 3 -->
+            <div class="ups-card">
+              <div class="ups-header-row">
+                <span class="ups-title">APC --- Back-UPS AB 750IG</span>
+                <span class="ups-status green">Active</span>
+              </div>
+              <div class="ups-updated">Updated 10 mins ago</div>
+              <div class="ups-row">
+                <span class="ups-battery green"><img src="Battery Icon.svg" class="ups-battery-icon" alt="Battery" />100%</span>
+                <span class="ups-ac"><img src="AC Power Source.svg" alt="AC" />AC Power Source</span>
+              </div>
+              <div class="ups-gauge-row">
+                <div class="ups-gauge" style="position:relative;">
+                  <div class="ups-gauge-needle" style="background:#22c55e;transform:translateX(-50%) rotate(30deg);"></div>
+                </div>
+                <span class="ups-gauge-label">12% Load</span>
+              </div>
+              <ul class="ups-info-list">
+                <li>Estimated Time: <strong>2h30m</strong></li>
+                <li>Input Voltage: <strong>230V, 240V</strong></li>
+                <li>Output Voltage: <strong>248V, 256V</strong></li>
+                <li>Output Current: <strong>14.9A, 15A</strong></li>
+                <li>Temperature: <strong>16°C</strong></li>
+              </ul>
+            </div>
+            <!-- UPS Card 4 -->
+            <div class="ups-card">
+              <div class="ups-header-row">
+                <span class="ups-title">APC --- Back-UPS AB 750IG</span>
+                <span class="ups-status gray">Ideal</span>
+              </div>
+              <div class="ups-updated">Updated 10 mins ago</div>
+              <div class="ups-row">
+                <span class="ups-battery gray"><img src="Battery Icon.svg" class="ups-battery-icon" alt="Battery" />100%</span>
+                <span class="ups-ac"><img src="AC Power Source.svg" alt="AC" />AC Power Source</span>
+              </div>
+              <div class="ups-gauge-row">
+                <div class="ups-gauge" style="position:relative;">
+                  <div class="ups-gauge-needle" style="background:#6b7280;transform:translateX(-50%) rotate(60deg);"></div>
+                </div>
+                <span class="ups-gauge-label">12% Load</span>
+              </div>
+              <ul class="ups-info-list">
+                <li>Estimated Time: <strong>2h30m</strong></li>
+                <li>Input Voltage: <strong>230V, 240V</strong></li>
+                <li>Output Voltage: <strong>248V, 256V</strong></li>
+                <li>Output Current: <strong>14.9A, 15A</strong></li>
+                <li>Temperature: <strong>16°C</strong></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+        <!-- Discover UPS Section -->
+        <section id="discover-section" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <div>
+              <h2 style="margin-bottom:0.2rem;">Total UPS (8)</h2>
+              <div style="color:var(--text-light);font-size:1.05rem;">You can monit UPS as per your requirment</div>
+            </div>
+            <form style="display:flex;align-items:center;gap:0.5rem;">
+              <input type="text" placeholder="Search" style="padding:0.6rem 1rem;border:1px solid var(--border);border-radius:0.4rem;font-size:1rem;" />
+              <button type="submit" style="background:#111;color:#fff;padding:0.6rem 1.2rem;border:none;border-radius:0.4rem;font-weight:600;">Submit</button>
+            </form>
+          </div>
+          <div style="background:var(--card);box-shadow:var(--shadow);border-radius:1rem;padding:2rem 1.5rem;">
+            <div style="font-weight:600;margin-bottom:0.7rem;">Connected Devices</div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:var(--bg);">
+                  <th style="padding:0.7rem 0.5rem;"><input type="checkbox" checked disabled /></th>
+                  <th style="padding:0.7rem 0.5rem;text-align:left;">IP</th>
+                  <th style="padding:0.7rem 0.5rem;text-align:left;">UPS</th>
+                  <th style="padding:0.7rem 0.5rem;text-align:left;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="font-weight:700;background:var(--bg);">
+                  <td><input type="checkbox" checked disabled /></td>
+                  <td>192.168.32.1</td>
+                  <td>Smart - UPS 1</td>
+                  <td style="color:var(--success);">Active</td>
+                </tr>
+                <tr><td><input type="checkbox" checked disabled /></td><td>192.168.32.2</td><td>Smart - UPS 2</td><td>Active</td></tr>
+                <tr><td><input type="checkbox" checked disabled /></td><td>192.168.32.3</td><td>Smart - UPS 3</td><td>Active</td></tr>
+                <tr><td><input type="checkbox" checked disabled /></td><td>192.168.32.4</td><td>Smart - UPS 4</td><td>Active</td></tr>
+                <tr><td><input type="checkbox" checked disabled /></td><td>192.168.32.5</td><td>Smart - UPS 5</td><td>Active</td></tr>
+              </tbody>
+            </table>
+            <div style="font-weight:600;margin:1.5rem 0 0.7rem 0;">Available Devices</div>
+            <table style="width:100%;border-collapse:collapse;">
+              <tbody>
+                <tr><td><input type="checkbox" /></td><td>192.168.32.6</td><td>Smart - UPS 6</td><td>Active</td></tr>
+                <tr><td><input type="checkbox" /></td><td>192.168.32.7</td><td>Smart - UPS 7</td><td>Active</td></tr>
+                <tr><td><input type="checkbox" /></td><td>192.168.32.8</td><td>Smart - UPS 8</td><td>Active</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <!-- Events Section -->
+        <section id="events-section" style="display:none;">
+          <h2 style="margin-bottom:0.5rem;">Events</h2>
+          <div style="color:var(--text-light);margin-bottom:1.5rem;">You can monit UPS as per your requirment</div>
+          <form style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.2rem;">
+            <input type="text" placeholder="Search" style="padding:0.6rem 1rem;border:1px solid var(--border);border-radius:0.4rem;font-size:1rem;" />
+            <select style="padding:0.6rem 1rem;border:1px solid var(--border);border-radius:0.4rem;font-size:1rem;">
+              <option>ALL</option>
+              <option>Critical</option>
+              <option>Warning</option>
+              <option>Info</option>
+            </select>
+          </form>
+          <div style="background:var(--card);box-shadow:var(--shadow);border-radius:1rem;padding:1.5rem 1.2rem;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--danger);">🚫</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">09-06-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--warning);">⚠️</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">09-06-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--success);">✔️</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">26-05-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--warning);">⚠️</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">26-05-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--success);">✔️</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">26-05-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem;">
+              <span style="font-size:1.5rem;color:var(--success);">✔️</span>
+              <span style="font-weight:500;">A communication channel has been established with UPS</span>
+              <span style="margin-left:auto;color:var(--text-light);font-size:0.98rem;">26-05-2025 / 07:41:15(GST+05:30)</span>
+            </div>
+          </div>
+        </section>
+        <!-- Profile Section -->
+        <section id="profile-section" style="display:none;max-width:600px;margin:auto;">
+          <div style="background:var(--card);box-shadow:var(--shadow);border-radius:1.2rem;padding:2.5rem 2rem;margin-top:2.5rem;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1.2rem;margin-bottom:2rem;">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--bg);background:var(--bg);" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:2rem;">
+              <div>
+                <div style="color:var(--text-light);font-size:0.98rem;margin-bottom:0.2rem;">Name</div>
+                <input type="text" value="Ajay Henry" style="width:100%;padding:0.7rem 1rem;border:none;background:var(--bg);border-radius:0.5rem;font-size:1.1rem;font-weight:600;" disabled />
+              </div>
+              <div>
+                <div style="color:var(--text-light);font-size:0.98rem;margin-bottom:0.2rem;">Username</div>
+                <input type="text" value="ajay_henry" style="width:100%;padding:0.7rem 1rem;border:none;background:var(--bg);border-radius:0.5rem;font-size:1.1rem;font-weight:600;" disabled />
+              </div>
+              <div>
+                <div style="color:var(--text-light);font-size:0.98rem;margin-bottom:0.2rem;">Phone number</div>
+                <input type="text" value="+1 515 599 9655" style="width:100%;padding:0.7rem 1rem;border:none;background:var(--bg);border-radius:0.5rem;font-size:1.1rem;font-weight:600;" disabled />
+              </div>
+              <div>
+                <div style="color:var(--text-light);font-size:0.98rem;margin-bottom:0.2rem;">Email</div>
+                <input type="email" value="ajayhenry2022@gmail.com" style="width:100%;padding:0.7rem 1rem;border:none;background:var(--bg);border-radius:0.5rem;font-size:1.1rem;font-weight:600;" disabled />
+              </div>
+            </div>
+            <button style="background:#111;color:#fff;padding:0.9rem 0;border:none;border-radius:0.5rem;font-weight:700;font-size:1.1rem;width:100%;">Edit</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script>
+    // SPA Navigation Logic
+    const signinSection = document.getElementById('signin-section');
+    const loadingSection = document.getElementById('loading-section');
+    const appLayout = document.getElementById('app-layout');
+    const signinForm = document.getElementById('signin-form');
+    const signinError = document.getElementById('signin-error');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = {
+      dashboard: document.getElementById('dashboard-section'),
+      discover: document.getElementById('discover-section'),
+      events: document.getElementById('events-section'),
+      profile: document.getElementById('profile-section'),
+    };
+
+    // Helper: Hide all main sections
+    function hideAllMainSections() {
+      appLayout.style.display = 'none';
+      signinSection.style.display = 'none';
+      loadingSection.style.display = 'none';
+      Object.values(sections).forEach(sec => sec.style.display = 'none');
+    }
+
+    // Show only the sign-in page on load
+    window.addEventListener('DOMContentLoaded', function() {
+      hideAllMainSections();
+      signinSection.style.display = 'flex';
+    });
+
+    // Show a main section by key
+    function showSection(page) {
+      Object.keys(sections).forEach(key => {
+        sections[key].style.display = (key === page) ? '' : 'none';
+      });
+    }
+
+    // Sign In Handler
+    signinForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('signin-username').value.trim();
+      const password = document.getElementById('signin-password').value.trim();
+      if (username && password) {
+        hideAllMainSections();
+        loadingSection.style.display = 'flex';
+        setTimeout(() => {
+          hideAllMainSections();
+          appLayout.style.display = 'flex';
+          showSection('dashboard');
+          navLinks.forEach(l => l.classList.remove('active'));
+          navLinks[0].classList.add('active'); // Dashboard active
+          signinError.style.display = 'none';
+        }, 2000);
+      } else {
+        signinError.textContent = 'Please enter username and password.';
+        signinError.style.display = 'block';
+      }
+    });
+
+    // Sidebar Navigation
+    navLinks.forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        const page = this.getAttribute('data-page');
+        showSection(page);
+      });
+    });
+
+    // Logout
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', function() {
+      hideAllMainSections();
+      signinSection.style.display = 'flex';
+      signinForm.reset();
+      navLinks.forEach(l => l.classList.remove('active'));
+      showSection(null);
+    });
+  </script>
+</body>
+</html> 
